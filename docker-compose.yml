@@ -1,0 +1,19 @@
+version: "3.7"
+
+networks:
+  crypto-net:
+
+services:
+
+  postgresdb:
+    image: "postgres:14"              # Use the official PostgreSQL image
+    container_name: postgresdb
+    restart: always
+    ports:
+      - "5432:5432"                   # PostgreSQL default port
+    networks:
+      - crypto-net
+    environment:
+      POSTGRES_DB: crime_db          # PostgreSQL database name
+      POSTGRES_USER: crime_admin     # PostgreSQL username
+      POSTGRES_PASSWORD: crime_admin # PostgreSQL password
