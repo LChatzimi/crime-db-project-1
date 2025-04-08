@@ -1,19 +1,83 @@
-version: "3.7"
+version: '3.8'
 
 networks:
-  crypto-net:
+  spilo_network:
+    driver: bridge
 
 services:
-
-  postgresdb:
-    image: "postgres:14"              # Use the official PostgreSQL image
-    container_name: postgresdb
-    restart: always
-    ports:
-      - "5432:5432"                   # PostgreSQL default port
-    networks:
-      - crypto-net
+  spilo1:
+    image: ghcr.io/zalando/spilo-15:3.0-p1
+    container_name: spilo1
+    hostname: spilo1
     environment:
-      POSTGRES_DB: crime_db          # PostgreSQL database name
-      POSTGRES_USER: crime_admin     # PostgreSQL username
-      POSTGRES_PASSWORD: crime_admin # PostgreSQL password
+      SPILO_SCOPE: "spilo-cluster"
+      SPILO_CLUSTER_NAME: "spilo-ha-cluster"
+      SPILO_REPLICATION_PASSWORD: "replica_pass"
+      SPILO_SUPERUSER_PASSWORD: "superuser_pass"
+      SPILO_POSTGRES_PASSWORD: "postgres_pass"
+      ETCD_HOST: "etcd:2379"
+      ETCD_DISCOVERY_DOMAIN: "etcd"
+    ports:
+      - "5432:5432"
+    networks:
+      - spilo_network
+    depends_on:
+      - etcd
+
+  spilo2:
+    image: ghcr.io/zalando/spilo-15:3.0-p1
+    container_name: spilo2
+    hostname: spilo2
+    environment:
+      SPILO_SCOPE: "spilo-cluster"
+      SPILO_CLUSTER_NAME: "spilo-ha-cluster"
+      SPILO_REPLICATION_PASSWORD: "replica_pass"
+      SPILO_SUPERUSER_PASSWORD: "superuser_pass"
+      SPILO_POSTGRES_PASSWORD: "postgres_pass"
+      ETCD_HOST: "etcd:2379"
+      ETCD_DISCOVERY_DOMAIN: "etcd"
+    ports:
+      - "5433:5432"
+    networks:
+      - spilo_network
+    depends_on:
+      - etcd
+
+  spilo3:
+    image: ghcr.io/zalando/spilo-15:3.0-p1
+    container_name: spilo3
+    hostname: spilo3
+    environment:
+      SPILO_SCOPE: "spilo-cluster"
+      SPILO_CLUSTER_NAME: "spilo-ha-cluster"
+      SPILO_REPLICATION_PASSWORD: "replica_pass"
+      SPILO_SUPERUSER_PASSWORD: "superuser_pass"
+      SPILO_POSTGRES_PASSWORD: "postgres_pass"
+      ETCD_HOST: "etcd:2379"
+      ETCD_DISCOVERY_DOMAIN: "etcd"
+    ports:
+      - "5434:5432"
+    networks:
+      - spilo_network
+    depends_on:
+      - etcd
+
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.12
+    container_name: etcd
+    command: >
+      etcd
+      --name etcd
+      --initial-advertise-peer-urls http://etcd:2380
+      --listen-peer-urls http://0.0.0.0:2380
+      --advertise-client-urls http://etcd:2379
+      --listen-client-urls http://0.0.0.0:2379
+      --initial-cluster etcd=http://etcd:2380
+      --initial-cluster-state new
+      --initial-cluster-token spilo-etcd-cluster
+      --enable-v2=true
+    networks:
+      - spilo_network
+    ports:
+      - "2379:2379"
+      - "2380:2380"

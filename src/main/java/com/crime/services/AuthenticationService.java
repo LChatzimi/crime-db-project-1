@@ -1,8 +1,6 @@
 package com.crime.services;
 
 
-import com.crime.dtos.LoginRequestDTO;
-import com.crime.entities.Users;
 import com.crime.repositories.UserRepository;
 import com.sun.jdi.request.DuplicateRequestException;
 import org.springframework.beans.factory.annotation.Autowired;

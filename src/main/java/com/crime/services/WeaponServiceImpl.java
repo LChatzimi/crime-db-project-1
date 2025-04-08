@@ -1,6 +1,5 @@
 package com.crime.services;
 
-import com.crime.entities.Weapon;
 import com.crime.repositories.WeaponRepository;
 import org.springframework.stereotype.Service;
 

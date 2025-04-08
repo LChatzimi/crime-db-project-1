@@ -1,7 +1,6 @@
 package com.crime.services;
 
 import com.crime.dtos.*;
-import com.crime.entities.Incident;
 import com.crime.repositories.IncidentRepository;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;

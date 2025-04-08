@@ -1,6 +1,5 @@
 package com.crime.services;
 
-import com.crime.entities.CrimeCode;
 import com.crime.repositories.CrimeCodeRepository;
 import org.springframework.stereotype.Service;
 

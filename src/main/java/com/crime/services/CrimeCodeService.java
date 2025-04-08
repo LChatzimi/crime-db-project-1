@@ -1,7 +1,5 @@
 package com.crime.services;
 
-import com.crime.entities.CrimeCode;
-
 import java.util.Set;
 
 public interface CrimeCodeService {

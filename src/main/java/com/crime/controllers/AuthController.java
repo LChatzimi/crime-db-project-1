@@ -1,8 +1,5 @@
 package com.crime.controllers;
 
-import com.crime.dtos.LoginRequestDTO;
-import com.crime.dtos.LoginResponse;
-import com.crime.entities.Users;
 import com.crime.http.JwtService;
 import com.crime.services.AuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
