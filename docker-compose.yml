@@ -81,3 +81,19 @@ services:
     ports:
       - "2379:2379"
       - "2380:2380"
+
+  haproxy:
+    image: haproxy:2.9
+    container_name: haproxy
+    networks:
+      - spilo_network
+    ports:
+      - "5000:5000" # HAProxy will listen here for Postgres clients
+      - "7000:7000" # Optional: web UI or debug
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    depends_on:
+      - spilo1
+      - spilo2
+      - spilo3
+
