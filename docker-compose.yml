@@ -10,7 +10,6 @@ services:
     container_name: spilo1
     hostname: spilo1
     environment:
-<<<<<<< Updated upstream
       SPILO_SCOPE: "spilo-cluster"
       SPILO_CLUSTER_NAME: "spilo-ha-cluster"
       SPILO_REPLICATION_PASSWORD: "replica_pass"
@@ -82,22 +81,3 @@ services:
     ports:
       - "2379:2379"
       - "2380:2380"
-=======
-      POSTGRES_DB: crime_db          # PostgreSQL database name
-      POSTGRES_USER: crime_admin     # PostgreSQL username
-      POSTGRES_PASSWORD: crime_admin # PostgreSQL password
-
-  orders-service:
-    container_name: spring_postgres_orders_service
-    build: spring_mongo_orders_service
-    image: spring_mongo_orders_service
-    depends_on:
-      - mongos
-    restart: always
-    environment:
-      SPRING_DATA_MONGODB_URI: mongodb://mongos:27017/spring_boot_mongo_app
-    ports:
-      - 8088:8088
-    networks:
-      - local-dev-net
->>>>>>> Stashed changes

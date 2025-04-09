@@ -1,6 +1,7 @@
 package com.crime.controllers;
 
 
+import com.crime.dto.OrderDTO;
 import com.crime.services.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,21 +12,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.List;
 
-@Tag(name = "Crime", description = "the Crime Api")
+@Tag(name = "Order", description = "the Order Api")
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
-@RequestMapping("/crime")
-public class CrimeController {
+@RequestMapping("/order")
+public class OrderController {
 
     final
-    IncidentService incidentService;
+    OrderService orderService;
 
 
-    public CrimeController(IncidentService incidentService) {
-        this.incidentService = incidentService;
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
     }
 
 
@@ -41,7 +41,7 @@ public class CrimeController {
                                              @RequestParam(name = "endTime", required = true) String endTime,
                                              @RequestParam(name = "crimeCode", required = true) String crimeCode) throws ParseException {
 
-        return incidentService.getQuery2Results(startTime,endTime, crimeCode);
+        return orderService.getQuery2Results(startTime,endTime, crimeCode);
     }
 
 
@@ -52,15 +52,14 @@ public class CrimeController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "successful operation")
     })
-    @PostMapping(value = "add-crime",name = "add-crime", produces = "application/json")
-    public ResponseEntity addCrime(@RequestBody List<Object> flatDTO) throws ParseException {
-//        try {
-//            dataImportService.importData(flatDTO,incidentService,crimeCodeService,weaponService,persistService);
-//            return new ResponseEntity<>(HttpStatus.OK);
-//        }catch (Exception e){
-//            e.printStackTrace();
-//            return  new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-        return new ResponseEntity<>(HttpStatus.OK);
+    @PostMapping(value = "createDummyOrders",name = "createDummyOrders", produces = "application/json")
+    public ResponseEntity addCrime(@RequestBody OrderDTO orderDTO) throws ParseException {
+        try {
+            orderService.createDummyOrders(orderDTO);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch (Exception e){
+            e.printStackTrace();
+            return  new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

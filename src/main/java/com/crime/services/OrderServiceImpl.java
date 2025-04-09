@@ -1,45 +1,60 @@
 package com.crime.services;
 
+import com.crime.dto.OrderDTO;
+import com.crime.dto.ResponseGenericDTO;
 import com.crime.entities.Order;
-import com.crime.repositories.IncidentRepository;
+import com.crime.repositories.OrderRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Service
-public class IncidentServiceImpl implements IncidentService {
+public class OrderServiceImpl implements OrderService {
 
     SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
 
-    final IncidentRepository incidentRepository;
+    final OrderRepository orderRepository;
 
     @Autowired
     EntityManager entityManager;
 
-    public IncidentServiceImpl(IncidentRepository cryptoTypeRepository) {
-        this.incidentRepository = cryptoTypeRepository;
+    public OrderServiceImpl(OrderRepository orderRepository) {
+        this.orderRepository = orderRepository;
     }
 //
     @Override
     public Order save(Order incident) {
-        return incidentRepository.save(incident);
+        return orderRepository.save(incident);
     }
 
     @Override
     public void saveAll(List<Order> incidents) {
-        incidentRepository.saveAll(incidents);
+        orderRepository.saveAll(incidents);
     }
 
     @Override
     public void flushClear() {
-        incidentRepository.flush();
+        orderRepository.flush();
         entityManager.clear();
+    }
+
+    public void createDummyOrders(OrderDTO orderDTO) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        for (int i = 0; i < 15; i++) {
+            Order order = objectMapper.convertValue(orderDTO, Order.class);
+            order.setOrderId(UUID.randomUUID().toString());
+            orderRepository.save(order);
+        }
+        new ResponseGenericDTO("Order created successfully", true);
     }
 
 
