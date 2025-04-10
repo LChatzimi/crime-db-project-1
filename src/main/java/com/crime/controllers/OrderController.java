@@ -16,7 +16,7 @@ import java.util.List;
 
 @Tag(name = "Order", description = "the Order Api")
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
+//@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/order")
 public class OrderController {
 
@@ -61,5 +61,10 @@ public class OrderController {
             e.printStackTrace();
             return  new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("/test-auth")
+    public ResponseEntity<String> testAuth() {
+        return ResponseEntity.ok("Auth works!");
     }
 }
