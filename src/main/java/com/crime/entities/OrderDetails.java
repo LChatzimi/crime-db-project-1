@@ -25,7 +25,7 @@ public class OrderDetails {
     private Order order;
 
     @ManyToOne(optional = false, cascade = CascadeType.ALL)
-    @JoinColumn(name = "PRODUCT_ID")
+    @JoinColumn(name = "PRODUCT_CODE")
     private Product product;
 
     @Column(name = "QUANTITY")

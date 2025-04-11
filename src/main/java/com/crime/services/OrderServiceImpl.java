@@ -3,6 +3,7 @@ package com.crime.services;
 import com.crime.dto.OrderDTO;
 import com.crime.dto.ResponseGenericDTO;
 import com.crime.entities.Order;
+import com.crime.entities.Product;
 import com.crime.repositories.OrderRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,9 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -49,9 +48,20 @@ public class OrderServiceImpl implements OrderService {
     public void createDummyOrders(OrderDTO orderDTO) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
 
+        Map<String, Product> productMap = new HashMap<>();
         for (int i = 0; i < 15; i++) {
             Order order = objectMapper.convertValue(orderDTO, Order.class);
             order.setOrderId(UUID.randomUUID().toString());
+            order.getOrderDetails().forEach(orderDetail -> {
+                orderDetail.setOrder(order);
+                Product product = productMap.get(orderDetail.getProduct().getProductCode());
+                if (product == null) {
+                    productMap.put(orderDetail.getProduct().getProductCode(), orderDetail.getProduct());
+                }
+                orderDetail.setProduct(productMap.get(orderDetail.getProduct().getProductCode()));
+            });
+
+
             orderRepository.save(order);
         }
         new ResponseGenericDTO("Order created successfully", true);
