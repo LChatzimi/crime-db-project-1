@@ -3,6 +3,7 @@ package com.crime.services;
 import com.crime.dto.OrderDTO;
 import com.crime.dto.ResponseGenericDTO;
 import com.crime.entities.Order;
+import com.crime.entities.OrderDetails;
 import com.crime.entities.Product;
 import com.crime.repositories.OrderRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -25,6 +26,8 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     EntityManager entityManager;
 
+    static Map<String, Product> productMap = new HashMap<>();
+
     public OrderServiceImpl(OrderRepository orderRepository) {
         this.orderRepository = orderRepository;
     }
@@ -46,27 +49,38 @@ public class OrderServiceImpl implements OrderService {
     }
 
     public void createDummyOrders(OrderDTO orderDTO) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
 
-        Map<String, Product> productMap = new HashMap<>();
         for (int i = 0; i < 15; i++) {
-            Order order = objectMapper.convertValue(orderDTO, Order.class);
-            order.setOrderId(UUID.randomUUID().toString());
-            order.getOrderDetails().forEach(orderDetail -> {
-                orderDetail.setOrder(order);
-                Product product = productMap.get(orderDetail.getProduct().getProductCode());
-                if (product == null) {
-                    productMap.put(orderDetail.getProduct().getProductCode(), orderDetail.getProduct());
-                }
-                orderDetail.setProduct(productMap.get(orderDetail.getProduct().getProductCode()));
-            });
-
+            Order order = mapOrder(orderDTO);
 
             orderRepository.save(order);
         }
         new ResponseGenericDTO("Order created successfully", true);
     }
 
+    private Order mapOrder(OrderDTO orderDTO) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Order order = objectMapper.convertValue(orderDTO, Order.class);
+        order.setOrderId(UUID.randomUUID().toString());
+        order.getOrderDetails().forEach(orderDetail -> {
+            orderDetail.setOrder(order);
+            Product product = getProduct(orderDetail);
+            orderDetail.setProduct(product);
+        });
+        return order;
+    }
+
+    private Product getProduct(OrderDetails orderDetail) {
+
+        Product product = entityManager.find(Product.class, orderDetail.getProduct().getProductCode());
+        if (product == null) {
+            product = productMap.get(orderDetail.getProduct().getProductCode());
+        }
+        if (product == null) {
+            productMap.put(orderDetail.getProduct().getProductCode(), orderDetail.getProduct());
+        }
+        return product;
+    }
 
 
     @Override
