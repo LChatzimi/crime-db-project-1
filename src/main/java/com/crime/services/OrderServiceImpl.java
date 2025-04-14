@@ -48,14 +48,16 @@ public class OrderServiceImpl implements OrderService {
         entityManager.clear();
     }
 
-    public void createDummyOrders(OrderDTO orderDTO) throws JsonProcessingException {
-
+    /**
+     * Create dummy orders
+     * @param orderDTO the order sample
+     */
+    public void createDummyOrders(OrderDTO orderDTO) {
         for (int i = 0; i < 15; i++) {
             Order order = mapOrder(orderDTO);
-
             orderRepository.save(order);
         }
-        new ResponseGenericDTO("Order created successfully", true);
+        new ResponseGenericDTO("Orders created successfully", true);
     }
 
     private Order mapOrder(OrderDTO orderDTO) {
