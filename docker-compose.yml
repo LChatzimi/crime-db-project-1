@@ -1,99 +1,44 @@
-version: '3.8'
-
-networks:
-  spilo_network:
-    driver: bridge
+version: '3.9'
 
 services:
-  spilo1:
-    image: ghcr.io/zalando/spilo-15:3.0-p1
-    container_name: spilo1
-    hostname: spilo1
-    environment:
-      SPILO_SCOPE: "spilo-cluster"
-      SPILO_CLUSTER_NAME: "spilo-ha-cluster"
-      PGPASSWORD_SUPERUSER: "postgres_pass"
-      PGUSER_SUPERUSER: "postgres"
-      SPILO_REPLICATION_PASSWORD: "replica_pass"
-      ETCD_HOST: "etcd:2379"
-      ETCD_DISCOVERY_DOMAIN: "etcd"
-    ports:
-      - "5432:5432"
-    networks:
-      - spilo_network
-    depends_on:
-      - etcd
-
-  spilo2:
-    image: ghcr.io/zalando/spilo-15:3.0-p1
-    container_name: spilo2
-    hostname: spilo2
-    environment:
-      SPILO_SCOPE: "spilo-cluster"
-      SPILO_CLUSTER_NAME: "spilo-ha-cluster"
-      PGPASSWORD_SUPERUSER: "postgres_pass"
-      PGUSER_SUPERUSER: "postgres"
-      SPILO_REPLICATION_PASSWORD: "replica_pass"
-      ETCD_HOST: "etcd:2379"
-      ETCD_DISCOVERY_DOMAIN: "etcd"
+  postgres1:
+    image: jgiannuzzi/postgres-bdr
+    container_name: postgres1
     ports:
       - "5433:5432"
-    networks:
-      - spilo_network
-    depends_on:
-      - etcd
-
-  spilo3:
-    image: ghcr.io/zalando/spilo-15:3.0-p1
-    container_name: spilo3
-    hostname: spilo3
     environment:
-      SPILO_SCOPE: "spilo-cluster"
-      SPILO_CLUSTER_NAME: "spilo-ha-cluster"
-      PGPASSWORD_SUPERUSER: "postgres_pass"
-      PGUSER_SUPERUSER: "postgres"
-      SPILO_REPLICATION_PASSWORD: "replica_pass"
-      ETCD_HOST: "etcd:2379"
-      ETCD_DISCOVERY_DOMAIN: "etcd"
+      POSTGRES_USER: bdr
+      POSTGRES_PASSWORD: bdrpass
+      POSTGRES_DB: bdrdb
+      POSTGRES_INITDB_ARGS: "--auth-host=trust --auth-local=trust"
+    volumes:
+      - pg1_data:/var/lib/postgresql/data
+      - ./init-scripts/pg_hba.conf:/var/lib/postgresql/pg_hba.conf
+      - ./init-scripts/node1/init.sh:/docker-entrypoint-initdb.d/init.sh
+    networks:
+      - bdrnet
+
+  postgres2:
+    image: jgiannuzzi/postgres-bdr
+    container_name: postgres2
     ports:
       - "5434:5432"
-    networks:
-      - spilo_network
-    depends_on:
-      - etcd
-
-  etcd:
-    image: quay.io/coreos/etcd:v3.5.12
-    container_name: etcd
-    command: >
-      etcd
-      --name etcd
-      --initial-advertise-peer-urls http://etcd:2380
-      --listen-peer-urls http://0.0.0.0:2380
-      --advertise-client-urls http://etcd:2379
-      --listen-client-urls http://0.0.0.0:2379
-      --initial-cluster etcd=http://etcd:2380
-      --initial-cluster-state new
-      --initial-cluster-token spilo-etcd-cluster
-      --enable-v2=true
-    networks:
-      - spilo_network
-    ports:
-      - "2379:2379"
-      - "2380:2380"
-
-  haproxy:
-    image: haproxy:2.9
-    container_name: haproxy
-    networks:
-      - spilo_network
-    ports:
-      - "5000:5000" # HAProxy will listen here for Postgres clients
-      - "7000:7000" # Optional: web UI or debug
+    environment:
+      POSTGRES_USER: bdr
+      POSTGRES_PASSWORD: bdrpass
+      POSTGRES_DB: bdrdb
+      POSTGRES_INITDB_ARGS: "--auth-host=trust --auth-local=trust"
     volumes:
-      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
-    depends_on:
-      - spilo1
-      - spilo2
-      - spilo3
+      - pg2_data:/var/lib/postgresql/data
+      - ./init-scripts/pg_hba.conf:/var/lib/postgresql/pg_hba.conf
+      - ./init-scripts/node2/init.sh:/docker-entrypoint-initdb.d/init.sh
+    networks:
+      - bdrnet
 
+volumes:
+  pg1_data:
+  pg2_data:
+
+networks:
+  bdrnet:
+    driver: bridge
