@@ -34,6 +34,19 @@ services:
     networks:
       - bdrnet
 
+  haproxy:
+    image: haproxy:2.9
+    container_name: haproxy
+    networks:
+      - bdrnet
+    ports:
+      - "5000:5000" # HAProxy will listen here for Postgres clients
+      - "7000:7000" # Optional: web UI or debug
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    depends_on:
+      - postgres1
+      - postgres2
 volumes:
   pg1_data:
   pg2_data:

@@ -8,6 +8,9 @@ import lombok.Setter;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
+
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -16,9 +19,10 @@ import lombok.Setter;
 public class OrderDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID")
-    private Long id;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "ID", updatable = false, nullable = false, columnDefinition = "uuid")
+    private UUID id;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "ORDER_ID")
