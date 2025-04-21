@@ -80,6 +80,7 @@ public class OrderServiceImpl implements OrderService {
         }
         if (product == null) {
             productMap.put(orderDetail.getProduct().getProductCode(), orderDetail.getProduct());
+            product = orderDetail.getProduct();
         }
         return product;
     }
