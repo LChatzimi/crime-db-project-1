@@ -1,20 +1,31 @@
 #!/bin/bash
 set -e
 
-echo "Waiting for node1 PostgreSQL to be ready..."
-until pg_isready -U bdr; do
+echo "[node1-init] $(date) Starting init script..."
+
+# Wait for PostgreSQL to accept local connections
+echo "[node1-init] $(date) Waiting for PostgreSQL to accept local connections..."
+until pg_isready -h localhost -U postgres; do
   sleep 1
 done
+echo "[node1-init] $(date) PostgreSQL is ready with local connections."
 
-sleep 5
+# Ensure listen_addresses = '*'
+echo "[node1-init] $(date) Setting listen_addresses = '*'..."
+psql -U postgres -c "ALTER SYSTEM SET listen_addresses = '*';"
+psql -U postgres -c "SELECT pg_reload_conf();"
 
-echo "Creating BDR group (node1)..."
-psql -U bdr -d bdrdb <<-EOSQL
-  CREATE EXTENSION IF NOT EXISTS btree_gist;
-  CREATE EXTENSION IF NOT EXISTS bdr;
+# Wait for TCP interface to be available
+echo "[node1-init] $(date) Waiting for TCP access via postgres1..."
+until pg_isready -h localhost -U bdr -d bdrdb; do
+  sleep 1
+done
+echo "[node1-init] $(date) postgres1 TCP access confirmed."
 
-  SELECT bdr.bdr_group_create(
-    local_node_name := 'node1',
-    node_external_dsn := 'host=localhost port=5432 dbname=bdrdb user=bdr password=bdrpass'
-  );
-EOSQL
+
+
+# Run finalize script in the background
+echo "[node1-init] $(date) Launching finalize script in background..."
+bash /finalize-node1.sh &
+
+echo "[node1-init] $(date) Init script done. Finalize continues in background."
